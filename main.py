@@ -11,7 +11,7 @@ m_Cl = 35.453 / (6.022e23)  # Masse de l'atome Cl (kg)
 
 # Paramètres de simulation
 
-dt = 1e-15  # Pas de temps (s)
+dt = 1e-16  # Pas de temps (s)
 n_steps = 100000  # Nombre de pas de temps
 
 # Fonction pour calculer la distance entre les deux atomes
@@ -35,25 +35,11 @@ def verlet_3d():
     Cl_vel = np.array([0.0, 0.0, 0.0])  # Vitesse initiale de Cl
     
     # Listes pour enregistrer les positions au cours du temps
-    H_positions = [H_pos.copy()]
-    Cl_positions = [Cl_pos.copy()]
-    H_velocity = [H_vel.copy()]
-    Cl_velocity = [Cl_vel.copy()]
+    H_positions = [H_pos, H_pos]
+    Cl_positions = [Cl_pos, Cl_pos]
+    H_velocity = [H_vel, H_vel]
+    Cl_velocity = [Cl_vel, Cl_vel]
     time_list = [0]
-    
-    #Calcul du premier pas : 
-
-    H_pos_new = H_pos
-    Cl_pos_new = Cl_pos 
-    H_pos = H_pos_new
-    Cl_pos = Cl_pos_new
-    H_vel_new = H_vel
-    Cl_vel_new = Cl_vel
-
-    H_positions.append(H_pos.copy())
-    Cl_positions.append(Cl_pos.copy())
-    H_velocity.append(H_vel.copy())
-    Cl_velocity.append(Cl_vel.copy())
 
     #Calcul du deuxième pas : 
 
@@ -67,10 +53,10 @@ def verlet_3d():
     H_pos = H_pos_new
     Cl_pos = Cl_pos_new
 
-    H_positions.append(H_pos.copy())
-    Cl_positions.append(Cl_pos.copy())
-    H_velocity.append(H_vel.copy())
-    Cl_velocity.append(Cl_vel.copy())
+    H_positions.append(H_pos)
+    Cl_positions.append(Cl_pos)
+    H_velocity.append(H_vel)
+    Cl_velocity.append(Cl_vel)
 
     for step in range(1, n_steps-2):
         # Calcul des forces
@@ -108,53 +94,20 @@ H_velocity = np.array(H_velocity)
 Cl_velocity = np.array(Cl_velocity)
 
 v_rel = H_velocity-Cl_velocity
-v_rel_norm = np.array([np.linalg.norm(v_rel[t]) for t in range(n_steps)])
+v_rel_norm = np.linalg.norm(v_rel, axis=1)
 µ = (m_H * m_Cl)/(m_H + m_Cl)
 energie_vibratoire = .5*µ*(v_rel_norm**2)
 
 r = (H_positions-Cl_positions)
-dist = np.array([np.linalg.norm(r[t]) for t in range(n_steps)])
+dist = np.linalg.norm(r, axis=1)
 energie_potentielle = .5*k*((dist-r_eq)**2)
-
-# #Visualisation de la distance entre H et Cl au cours du temps
-# distances = [distance(H_positions[i], Cl_positions[i]) for i in range(0,8000)]
-# temps = time[0:8000]
-# plt.figure(figsize=(10, 6))
-# plt.plot(temps, distances)
-# plt.axhline(r_eq, color='red', linestyle='--', label='Distance d\'équilibre')
-# plt.xlabel('Temps (s)')
-# plt.ylabel('Distance H-Cl (m)')
-# plt.title('Distance entre H et Cl au cours du temps')
-# plt.legend()
-# plt.grid(True)
-# plt.show()
-
-# #Visualtion de la position sur x de H et de Cl au cours du temps
-# position_H = [H_positions[i][0] for i in range(0,8000)]
-# position_Cl = [Cl_positions[i][0] for i in range(0,8000)]
-# temps = time[0:8000]
-# plt.figure(figsize=(10,6))
-# plt.plot(temps, position_H)
-# plt.plot(temps, position_Cl)
-# plt.xlabel('Temps (s)')
-# plt.grid(True)
-# plt.show()
-
-# #Visualisation de la vitesse sur x de Cl au cours du temps 
-# vitesse_Cl = [Cl_velocity[i][0] for i in range(0,8000)]
-# temps = time[0:8000]
-# plt.figure(figsize=(10,6))
-# plt.plot(temps, vitesse_Cl)
-# plt.xlabel('Temps (s)')
-# plt.grid(True)
-# plt.show()
 
 # Visualisation de la vitesse sur x de Cl au cours du temps 
 E = energie_vibratoire + energie_potentielle
-plot1  = [energie_vibratoire[i] for i in range(8000)]
-plot2 = [energie_potentielle[i] for i in range(8000)]
-plot3 = [E[i] for i in range(8000)]
-temps = time[0:8000]
+plot1  = [energie_vibratoire[i] for i in range(20000)]
+plot2 = [energie_potentielle[i] for i in range(20000)]
+plot3 = [E[i] for i in range(20000)]
+temps = time[0:20000]
 plt.figure(figsize=(10,6))
 plt.plot(temps, plot1, c="red")
 plt.plot(temps, plot2, c="blue")

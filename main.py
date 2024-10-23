@@ -107,6 +107,14 @@ Cl_positions = np.array(Cl_positions)
 H_velocity = np.array(H_velocity)
 Cl_velocity = np.array(Cl_velocity)
 
+v_rel = H_velocity-Cl_velocity
+v_rel_norm = np.array([np.linalg.norm(v_rel[t]) for t in range(n_steps)])
+µ = (m_H * m_Cl)/(m_H + m_Cl)
+energie_vibratoire = .5*µ*(v_rel_norm**2)
+
+r = (H_positions-Cl_positions)
+dist = np.array([np.linalg.norm(r[t]) for t in range(n_steps)])
+energie_potentielle = .5*k*((dist-r_eq)**2)
 
 # #Visualisation de la distance entre H et Cl au cours du temps
 # distances = [distance(H_positions[i], Cl_positions[i]) for i in range(0,8000)]
@@ -140,3 +148,16 @@ Cl_velocity = np.array(Cl_velocity)
 # plt.xlabel('Temps (s)')
 # plt.grid(True)
 # plt.show()
+
+# Visualisation de la vitesse sur x de Cl au cours du temps 
+E = energie_vibratoire + energie_potentielle
+plot1  = [energie_vibratoire[i] for i in range(8000)]
+plot2 = [energie_potentielle[i] for i in range(8000)]
+plot3 = [E[i] for i in range(8000)]
+temps = time[0:8000]
+plt.figure(figsize=(10,6))
+plt.plot(temps, plot1, c="red")
+plt.plot(temps, plot2, c="blue")
+plt.plot(temps, plot3, c="green")
+plt.grid(True)
+plt.show()

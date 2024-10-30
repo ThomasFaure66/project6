@@ -31,12 +31,12 @@ def verlet_3d():
     H_pos = np.array([-r_eq/10, 0.0, 0.0])  # Position initiale de H
     Cl_pos = np.array([r_eq, 0.0, 0.0])  # Position initiale de Cl (à r_eq de H)
     
-    H_vel = np.array([0.0, 0.0, 0.0])  # Vitesse initiale de H
+    H_vel = np.array([0.0, 100, 0.0])  # Vitesse initiale de H
     Cl_vel = np.array([0.0, 0.0, 0.0])  # Vitesse initiale de Cl
     
     # Listes pour enregistrer les positions au cours du temps
-    H_positions = [H_pos, H_pos]
-    Cl_positions = [Cl_pos, Cl_pos]
+    H_positions = [H_pos, H_pos + H_vel*dt]
+    Cl_positions = [Cl_pos, Cl_pos + Cl_vel*dt]
     H_velocity = [H_vel, H_vel]
     Cl_velocity = [Cl_vel, Cl_vel]
     time_list = [0]
@@ -47,7 +47,7 @@ def verlet_3d():
     H_acc = F / m_H  # Accélération de H
     Cl_acc = -F / m_Cl
 
-    H_pos_new = 2*H_pos - H_positions[-2] + H_acc * dt**2
+    H_pos_new = 2*H_positions[-1] - H_positions[-2] + H_acc * dt**2
     Cl_pos_new = 2*Cl_pos - Cl_positions[-2] + Cl_acc * dt**2
 
     H_pos = H_pos_new
@@ -96,21 +96,32 @@ Cl_velocity = np.array(Cl_velocity)
 v_rel = H_velocity-Cl_velocity
 v_rel_norm = np.linalg.norm(v_rel, axis=1)
 µ = (m_H * m_Cl)/(m_H + m_Cl)
-energie_vibratoire = .5*µ*(v_rel_norm**2)
+Ec = .5*µ*(v_rel_norm**2)
+
+d = np.linalg.norm(H_positions-Cl_positions, axis = 1)
+dp = np.array([(3*d[k]-4*d[k-1]+d[k-2])/(2*dt) for k in range(2, n_steps)] + [0,0])
+Ev = .5*µ*(dp**2)
 
 r = (H_positions-Cl_positions)
 dist = np.linalg.norm(r, axis=1)
-energie_potentielle = .5*k*((dist-r_eq)**2)
+Ep = .5*k*((dist-r_eq)**2)
+
+Er = Ec-Ev
+
+
 
 # Visualisation de la vitesse sur x de Cl au cours du temps 
-E = energie_vibratoire + energie_potentielle
-plot1  = [energie_vibratoire[i] for i in range(20000)]
-plot2 = [energie_potentielle[i] for i in range(20000)]
-plot3 = [E[i] for i in range(20000)]
-temps = time[0:20000]
+H = Ec + Ep
+plot1  = [H[i] for i in range(50000)]
+plot2 = [Ep[i] for i in range(50000)]
+plot3 = [Ev[i] for i in range(50000)]
+plot4 = [Er[i] for i in range(50000)]
+temps = time[0:50000]
 plt.figure(figsize=(10,6))
-plt.plot(temps, plot1, c="red")
-plt.plot(temps, plot2, c="blue")
-plt.plot(temps, plot3, c="green")
+plt.plot(temps, plot1, c="red", label="energie totale")
+plt.plot(temps, plot2, c="blue", label="energie potentielle")
+plt.plot(temps, plot3, c="green", label="energie vibratoire")
+plt.plot(temps, plot4, c="orange", label="energie rotative")
+plt.legend()
 plt.grid(True)
 plt.show()

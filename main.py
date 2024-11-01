@@ -42,10 +42,6 @@ def verlet_3d():
     Cl_positions = [Cl_pos, Cl_pos + Cl_vel*dt]
     H_velocity = [H_vel, H_vel]
     Cl_velocity = [Cl_vel, Cl_vel]
-    H_positions = [H_pos, H_pos + H_vel*dt]
-    Cl_positions = [Cl_pos, Cl_pos + Cl_vel*dt]
-    H_velocity = [H_vel, H_vel]
-    Cl_velocity = [Cl_vel, Cl_vel]
     time_list = [0]
 
     #Calcul du deuxième pas : 
@@ -118,27 +114,30 @@ Cl_velocity = np.array(Cl_velocity)
 
 mu = (m_H*m_Cl)/(m_Cl+m_H)
 CM_velocity = (m_H*H_velocity+m_Cl*Cl_velocity)/(m_H+m_Cl)
-print("CM_velocity", CM_velocity)
+
 Relative_position = Cl_positions - H_positions
-Relative_velocity = Cl_velocity-H_velocity
+Relative_velocity = Cl_velocity - H_velocity
 
 Translation_energy = 0.5 * (m_Cl+m_H)*np.linalg.norm(CM_velocity, axis = 1)**2
-print("Energie de translation", Translation_energy)
 
-Vibrational_energy = 0.5*(mu)*np.linalg.norm(Relative_velocity, axis = 1)**2
-print("Energie de vibration", Vibrational_energy)
+
+r_dot = (Relative_position[:,0]*Relative_velocity[:,0]+Relative_position[:,1]*Relative_velocity[:,1]+Relative_position[:,2]*Relative_velocity[:,2])/(np.sqrt(Relative_position[:,0]**2+Relative_position[:,1]**2+Relative_position[:,2]**2))
+
+print(r_dot)
+
+Vibrational_energy = 0.5*(mu)*r_dot**2
+# Vibrational_energy = 0.5*(mu)*np.linalg.norm(Relative_velocity, axis = 1)**2
+# print("Energie de vibration", Vibrational_energy)
 
 omega = np.linalg.norm(np.cross(Relative_position, Relative_velocity), axis=1) / (np.linalg.norm(Relative_position, axis=1)**2)
 I = mu*np.linalg.norm(Relative_position, axis = 1)**2
 Rotational_energy = 0.5*I*omega**2
-print("energie de rotation", Rotational_energy)
 
-print(Relative_position)
 Potential_energy = 0.5*k*((np.linalg.norm(Relative_position, axis = 1)-r_eq)**2)
-print("energie potentielle", Potential_energy)
+
 
 Total_energy = Potential_energy + Translation_energy + Vibrational_energy + Rotational_energy
-print("energie totale", Total_energy)
+
 
 plot1  = [Total_energy[i] for i in range(0,n_steps-2)]
 plot2 = [Potential_energy[i] for i in range(0,n_steps-2)]

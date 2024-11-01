@@ -1,31 +1,20 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.animation import FuncAnimation
+
+from potentials import distance, force_harmonique, k, r_eq
 
 # Constantes physiques
-k = 4.61  # Constante de raideur du ressort (N/m)
+
 r_eq = 1.27e-10  # Distance d'équilibre de la liaison HCl (m)
 m_H = 1.00784 / (6.022e23)  # Masse de l'atome H (kg)
 m_Cl = 35.453 / (6.022e23)  # Masse de l'atome Cl (kg)
 kB = 1.380e-23 # Constante de Boltzmann
 T_ther = 300 # Température thermostat
-gamma = 1e12
+gamma = 0
 # Paramètres de simulation
 
 dt = 1e-16 # Pas de temps (s)
-n_steps = 5000000  # Nombre de pas de temps
-
-# Fonction pour calculer la distance entre les deux atomes
-def distance(H_pos, Cl_pos):
-    return np.sqrt(np.sum((Cl_pos - H_pos)**2))
-
-# Fonction de la force harmonique en fonction de la distance
-def force(H_pos, Cl_pos):
-    r = distance(H_pos, Cl_pos)
-    magnitude = k * (r - r_eq)
-    direction = (Cl_pos - H_pos) / r  # Vecteur directionnel normalisé
-    return magnitude * direction
+n_steps = 50000  # Nombre de pas de temps
 
 # Algorithme de Verlet pour l'intégration des équations de mouvement en 3D
 def verlet_3d():
@@ -46,7 +35,7 @@ def verlet_3d():
 
     #Calcul du deuxième pas : 
 
-    F = force(H_pos, Cl_pos)
+    F = force_harmonique(H_pos, Cl_pos)
 
     #Calcul force de langevin :
     R_H = np.array([np.sqrt((2*m_H*gamma*kB*T_ther)/dt)*np.random.normal(0, 1),np.sqrt((2*m_H*gamma*kB*T_ther)/dt)*np.random.normal(0, 1),np.sqrt((2*m_H*gamma*kB*T_ther)/dt)*np.random.normal(0, 1)])
@@ -74,7 +63,7 @@ def verlet_3d():
         R_Cl = np.array([np.sqrt((2*m_Cl*gamma*kB*T_ther)/dt)*np.random.normal(0, 1),np.sqrt((2*m_H*gamma*kB*T_ther)/dt)*np.random.normal(0, 1),np.sqrt((2*m_H*gamma*kB*T_ther)/dt)*np.random.normal(0, 1)])
   
         # Calcul des forces
-        F = force(H_pos, Cl_pos)
+        F = force_harmonique(H_pos, Cl_pos)
         
         H_vel_new = (3*H_pos - 4*H_positions[-2]+H_positions[-3])/(2*dt)
         Cl_vel_new = (3*Cl_pos - 4*Cl_positions[-2]+Cl_positions[-3])/(2*dt)
@@ -194,23 +183,3 @@ plt.title('Distance entre H et Cl au cours du temps')
 plt.legend()
 plt.grid(True)
 plt.show()
-
-# #Visualtion de la position sur x de H et de Cl au cours du temps
-# position_H = [H_positions[i][0] for i in range(0,8000)]
-# position_Cl = [Cl_positions[i][0] for i in range(0,8000)]
-# temps = time[0:8000]
-# plt.figure(figsize=(10,6))
-# plt.plot(temps, position_H)
-# plt.plot(temps, position_Cl)
-# plt.xlabel('Temps (s)')
-# plt.grid(True)
-# plt.show()
-
-# #Visualisation de la vitesse sur x de Cl au cours du temps 
-# vitesse_Cl = [Cl_velocity[i][0] for i in range(0,8000)]
-# temps = time[0:8000]
-# plt.figure(figsize=(10,6))
-# plt.plot(temps, vitesse_Cl)
-# plt.xlabel('Temps (s)')
-# plt.grid(True)
-# plt.show()

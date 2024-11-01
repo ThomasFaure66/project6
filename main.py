@@ -9,12 +9,12 @@ r_eq = 1.27e-10  # Distance d'équilibre de la liaison HCl (m)
 m_H = 1.00784 / (6.022e23)  # Masse de l'atome H (kg)
 m_Cl = 35.453 / (6.022e23)  # Masse de l'atome Cl (kg)
 kB = 1.380e-23 # Constante de Boltzmann
-T_ther = 30 # Température thermostat
-gamma = 0
+T_ther = 300 # Température thermostat
+gamma = 1e12
 # Paramètres de simulation
 
 dt = 1e-16 # Pas de temps (s)
-n_steps = 50000  # Nombre de pas de temps
+n_steps = 5000000  # Nombre de pas de temps
 
 # Fonction pour calculer la distance entre les deux atomes
 def distance(H_pos, Cl_pos):
@@ -32,9 +32,9 @@ def verlet_3d():
     # Initialisation des position
     # s et des vitesses dans l'espace 3D
     H_pos = np.array([r_eq, 0.0, 0.0])  # Position initiale de H
-    Cl_pos = np.array([-r_eq/10, 0.0, 0.0])  # Position initiale de Cl (à r_eq de H)
+    Cl_pos = np.array([0, 0.0, 0.0])  # Position initiale de Cl (à r_eq de H)
     
-    H_vel = np.array([0.0, 10.0, 0.0])  # Vitesse initiale de H
+    H_vel = np.array([0.0, np.sqrt(3*kB*250/m_H), 0.0])  # Vitesse initiale de H
     Cl_vel = np.array([0.0, 0.0, 0.0])  # Vitesse initiale de Cl
     
     # Listes pour enregistrer les positions au cours du temps
@@ -123,7 +123,7 @@ Translation_energy = 0.5 * (m_Cl+m_H)*np.linalg.norm(CM_velocity, axis = 1)**2
 
 r_dot = (Relative_position[:,0]*Relative_velocity[:,0]+Relative_position[:,1]*Relative_velocity[:,1]+Relative_position[:,2]*Relative_velocity[:,2])/(np.sqrt(Relative_position[:,0]**2+Relative_position[:,1]**2+Relative_position[:,2]**2))
 
-print(r_dot)
+
 
 Vibrational_energy = 0.5*(mu)*r_dot**2
 # Vibrational_energy = 0.5*(mu)*np.linalg.norm(Relative_velocity, axis = 1)**2
@@ -138,6 +138,12 @@ Potential_energy = 0.5*k*((np.linalg.norm(Relative_position, axis = 1)-r_eq)**2)
 
 Total_energy = Potential_energy + Translation_energy + Vibrational_energy + Rotational_energy
 
+print(np.mean(Total_energy[-10000:]))
+print(np.mean(Potential_energy[-10000:]))
+print(np.mean(Translation_energy[-10000:]))
+print(np.mean(Vibrational_energy[-10000:]))
+print(np.mean(Rotational_energy[-10000:]))
+
 
 plot1  = [Total_energy[i] for i in range(0,n_steps-2)]
 plot2 = [Potential_energy[i] for i in range(0,n_steps-2)]
@@ -146,11 +152,17 @@ plot4 = [Vibrational_energy[i] for i in range(0,n_steps-2)]
 plot5 = [Rotational_energy[i] for i in range(0,n_steps-2)]
 temps = time[0:n_steps-2]
 plt.figure(figsize=(10,6))
+
 plt.plot(temps, plot1, c="red", label="energie totale")
+plt.axhline(np.mean(Total_energy[-1000:]), color='red', linestyle='--', label='"energie totale moyenne')
 plt.plot(temps, plot2, c="blue", label="energie potentielle")
+plt.axhline(np.mean(Potential_energy[-1000:]), color='blue', linestyle='--', label='"energie potentielle moyenne')
 plt.plot(temps, plot3, c="green", label="energie de translation")
+plt.axhline(np.mean(Translation_energy[-1000:]), color='green', linestyle='--', label='"energie de translation moyenne')
 plt.plot(temps, plot4, c="orange", label="energie de vibration")
+plt.axhline(np.mean(Vibrational_energy[-1000:]), color='orange', linestyle='--', label='"energie de vibration moyenne')
 plt.plot(temps, plot5, c="yellow", label="energie rotative")
+plt.axhline(np.mean(Rotational_energy[-1000:]), color='yellow', linestyle='--', label='"energie rotationelle moyenne')
 plt.legend()
 plt.grid(True)
 plt.show()
@@ -171,17 +183,17 @@ plt.show()
 # plt.show()
 
 #Visualisation de la distance entre H et Cl au cours du temps
-# distances = [distance(H_positions[i], Cl_positions[i]) for i in range(0,n_steps-2)]
-# temps = time[0:n_steps-2]
-# plt.figure(figsize=(10, 6))
-# plt.plot(temps, distances)
-# plt.axhline(r_eq, color='red', linestyle='--', label='Distance d\'équilibre')
-# plt.xlabel('Temps (s)')
-# plt.ylabel('Distance H-Cl (m)')
-# plt.title('Distance entre H et Cl au cours du temps')
-# plt.legend()
-# plt.grid(True)
-# plt.show()
+distances = [distance(H_positions[i], Cl_positions[i]) for i in range(0,n_steps-2)]
+temps = time[0:n_steps-2]
+plt.figure(figsize=(10, 6))
+plt.plot(temps, distances)
+plt.axhline(r_eq, color='red', linestyle='--', label='Distance d\'équilibre')
+plt.xlabel('Temps (s)')
+plt.ylabel('Distance H-Cl (m)')
+plt.title('Distance entre H et Cl au cours du temps')
+plt.legend()
+plt.grid(True)
+plt.show()
 
 # #Visualtion de la position sur x de H et de Cl au cours du temps
 # position_H = [H_positions[i][0] for i in range(0,8000)]

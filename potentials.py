@@ -15,3 +15,4 @@ def force_harmonique(H_pos, Cl_pos):
     magnitude = k * (r - r_eq)
     direction = (Cl_pos - H_pos) / r  # Vecteur directionnel normalisé
     return magnitude * direction
+

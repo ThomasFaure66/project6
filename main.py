@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from potentials import distance, force_harmonique, k, r_eq
+from potentials import distance, force_harmonique, force_morse, k, r_eq
 from solver import solve_verlet
 
 # Constantes physiques
@@ -15,7 +15,7 @@ gamma = 0
 # Paramètres de simulation
 
 dt = 1e-16 # Pas de temps (s)
-n_steps = 50000  # Nombre de pas de temps
+n_steps = 10000  # Nombre de pas de temps
 
 # Algorithme de Verlet pour l'intégration des équations de mouvement en 3D
 def verlet_3d():
@@ -93,13 +93,13 @@ def verlet_3d():
 # Lancement de la simulation
 
 H_pos0 = np.array([r_eq, 0.0, 0.0])  # Position initiale de H
-Cl_pos0 = np.array([0.0, 0.0, 0.0])  # Position initiale de Cl (à r_eq de H)
-H_vel0 = np.array([0.0, np.sqrt(3*kB*10/m_H), 0.0])  # Vitesse initiale de H
+Cl_pos0 = np.array([-r_eq/100000, 0.0, 0.0])  # Position initiale de Cl (à r_eq de H)
+H_vel0 = np.array([0.0, 0.0, 0.0])  # Vitesse initiale de H
 C_vel0 = np.array([0.0, 0.0, 0.0])  # Vitesse initiale de Cl
 
 H_positions, Cl_positions, H_velocity, Cl_velocity = solve_verlet(H_pos0=H_pos0,
                                                                         Cl_pos0=Cl_pos0,
-                                                                        F = force_harmonique,
+                                                                        F = force_morse,
                                                                         N = n_steps,
                                                                         dt=dt,
                                                                         H_vel0=H_vel0,

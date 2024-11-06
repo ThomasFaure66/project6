@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from potentials import distance, force_harmonique, force_morse, k, r_eq
+from potentials import distance, force_harmonique, force_morse, k, r_eq, pot_morse, pot_har
 from solver import solve_verlet
 
 # Constantes physiques
@@ -93,8 +93,8 @@ def verlet_3d():
 # Lancement de la simulation
 
 H_pos0 = np.array([r_eq, 0.0, 0.0])  # Position initiale de H
-Cl_pos0 = np.array([-r_eq/100000, 0.0, 0.0])  # Position initiale de Cl (à r_eq de H)
-H_vel0 = np.array([0.0, 0.0, 0.0])  # Vitesse initiale de H
+Cl_pos0 = np.array([-r_eq/100, 0.0, 0.0])  # Position initiale de Cl (à r_eq de H)
+H_vel0 = np.array([0.0, 10.0, 0.0])  # Vitesse initiale de H
 C_vel0 = np.array([0.0, 0.0, 0.0])  # Vitesse initiale de Cl
 
 H_positions, Cl_positions, H_velocity, Cl_velocity = solve_verlet(H_pos0=H_pos0,
@@ -130,10 +130,9 @@ Vibrational_energy = 0.5*(mu)*r_dot2**2
 I = mu*(r_norm**2)
 Rotational_energy = 0.5*I*omega**2
 
-Potential_energy = 0.5*k*(r_norm-r_eq)**2
+Potential_energy = pot_morse(r_norm-r_eq)
 
 Total_energy = Potential_energy + Translation_energy + Vibrational_energy + Rotational_energy
-
 
 plot1 = [Total_energy[i] for i in range(0,n_steps)]
 plot2 = [Potential_energy[i] for i in range(0,n_steps)]

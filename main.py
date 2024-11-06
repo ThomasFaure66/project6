@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from potentials import distance, force_harmonique, force_morse, k, r_eq, pot_morse, pot_har
-from solver import solve_verlet
+from solver import solve_verlet, solve_verlet_lang
 
 # Constantes physiques
 
@@ -11,99 +11,24 @@ m_H = 1.00784 / (6.022e23)  # Masse de l'atome H (kg)
 m_Cl = 35.453 / (6.022e23)  # Masse de l'atome Cl (kg)
 kB = 1.380e-23 # Constante de Boltzmann
 T_ther = 300 # Température thermostat
-gamma = 0
+gamma = 1e12
 # Paramètres de simulation
 
 dt = 1e-16 # Pas de temps (s)
-n_steps = 10000  # Nombre de pas de temps
-
-# Algorithme de Verlet pour l'intégration des équations de mouvement en 3D
-def verlet_3d():
-    # Initialisation des position
-    # s et des vitesses dans l'espace 3D
-    H_pos = np.array([r_eq, 0.0, 0.0])  # Position initiale de H
-    Cl_pos = np.array([0.0, 0.0, 0.0])  # Position initiale de Cl (à r_eq de H)
-    
-    H_vel = np.array([0.0, np.sqrt(3*kB*10/m_H), 0.0])  # Vitesse initiale de H
-    Cl_vel = np.array([0.0, 0.0, 0.0])  # Vitesse initiale de Cl
-    
-    # Listes pour enregistrer les positions au cours du temps
-    H_positions = [H_pos, H_pos + H_vel*dt]
-    Cl_positions = [Cl_pos, Cl_pos + Cl_vel*dt]
-    H_velocity = [H_vel, H_vel]
-    Cl_velocity = [Cl_vel, Cl_vel]
-    time_list = [0]
-
-    #Calcul du deuxième pas : 
-
-    F = force_harmonique(H_pos, Cl_pos)
-
-    #Calcul force de langevin :
-    R_H = np.array([np.sqrt((2*m_H*gamma*kB*T_ther)/dt)*np.random.normal(0, 1),np.sqrt((2*m_H*gamma*kB*T_ther)/dt)*np.random.normal(0, 1),np.sqrt((2*m_H*gamma*kB*T_ther)/dt)*np.random.normal(0, 1)])
-    R_Cl = np.array([np.sqrt((2*m_Cl*gamma*kB*T_ther)/dt)*np.random.normal(0, 1),np.sqrt((2*m_H*gamma*kB*T_ther)/dt)*np.random.normal(0, 1),np.sqrt((2*m_H*gamma*kB*T_ther)/dt)*np.random.normal(0, 1)])
-
-    H_acc = F / m_H  - gamma * H_velocity[-1] + R_H/m_H # Accélération de H
-    Cl_acc = -F / m_Cl  - gamma*Cl_velocity[-1] + R_Cl/m_Cl# Accélération de Cl (force opposée)
-
-    H_pos_new = 2*H_positions[-1] - H_positions[-2] + H_acc * dt**2
-    Cl_pos_new = 2*Cl_positions[-1] - Cl_positions[-2] + Cl_acc * dt**2
-
-
-    H_pos = H_pos_new
-    Cl_pos = Cl_pos_new
-
-    H_positions.append(H_pos)
-    Cl_positions.append(Cl_pos)
-    H_velocity.append(H_vel)
-    Cl_velocity.append(Cl_vel)
-
-    for step in range(1, n_steps-2):
-
-        #Calcul force de Langevin
-        R_H = np.array([np.sqrt((2*m_H*gamma*kB*T_ther)/dt)*np.random.normal(0, 1),np.sqrt((2*m_H*gamma*kB*T_ther)/dt)*np.random.normal(0, 1),np.sqrt((2*m_H*gamma*kB*T_ther)/dt)*np.random.normal(0, 1)])
-        R_Cl = np.array([np.sqrt((2*m_Cl*gamma*kB*T_ther)/dt)*np.random.normal(0, 1),np.sqrt((2*m_H*gamma*kB*T_ther)/dt)*np.random.normal(0, 1),np.sqrt((2*m_H*gamma*kB*T_ther)/dt)*np.random.normal(0, 1)])
-  
-        # Calcul des forces
-        F = force_harmonique(H_pos, Cl_pos)
-        
-        H_vel_new = (3*H_pos - 4*H_positions[-2]+H_positions[-3])/(2*dt)
-        Cl_vel_new = (3*Cl_pos - 4*Cl_positions[-2]+Cl_positions[-3])/(2*dt)
-
-        #Generation de la force aléatoire
-        H_acc = F / m_H  - gamma * H_vel_new + R_H/m_H # Accélération de H
-        Cl_acc = -F / m_Cl  - gamma*Cl_vel_new + R_Cl/m_Cl# Accélération de Cl (force opposée)
-        
-        # Mise à jour des positions
-        H_pos_new = 2*H_pos - H_positions[-2] + H_acc * dt**2
-        Cl_pos_new = 2*Cl_pos - Cl_positions[-2] + Cl_acc * dt**2
-        
-        # Enregistrement des positions et du temps
-        H_pos = H_pos_new
-        Cl_pos = Cl_pos_new
-        H_vel = H_vel_new
-        Cl_vel = Cl_vel_new
-        H_positions.append(H_pos.copy())
-        Cl_positions.append(Cl_pos.copy())
-        H_velocity.append(H_vel.copy())
-        Cl_velocity.append(Cl_vel.copy())
-        time_list.append(step * dt)
-    
-    return time_list, H_positions, Cl_positions, H_velocity, Cl_velocity
+n_steps = 100000  # Nombre de pas de temps
 
 # Lancement de la simulation
 
 H_pos0 = np.array([r_eq, 0.0, 0.0])  # Position initiale de H
-Cl_pos0 = np.array([-r_eq/100, 0.0, 0.0])  # Position initiale de Cl (à r_eq de H)
-H_vel0 = np.array([0.0, 10.0, 0.0])  # Vitesse initiale de H
-C_vel0 = np.array([0.0, 0.0, 0.0])  # Vitesse initiale de Cl
+Cl_pos0 = np.array([0.0, 0.0, 0.0])  # Position initiale de Cl (à r_eq de H)
 
-H_positions, Cl_positions, H_velocity, Cl_velocity = solve_verlet(H_pos0=H_pos0,
+H_positions, Cl_positions, H_velocity, Cl_velocity = solve_verlet_lang(H_pos0=H_pos0,
                                                                         Cl_pos0=Cl_pos0,
-                                                                        F = force_morse,
+                                                                        F = force_harmonique,
                                                                         N = n_steps,
                                                                         dt=dt,
-                                                                        H_vel0=H_vel0,
-                                                                        Cl_vel0=C_vel0
+                                                                        gamma = gamma,
+                                                                        T=10
 )
 #time, H_positions, Cl_positions, H_velocity, Cl_velocity = verlet_3d()
 
@@ -112,6 +37,11 @@ H_positions = np.array(H_positions)
 Cl_positions = np.array(Cl_positions)
 H_velocity = np.array(H_velocity)
 Cl_velocity = np.array(Cl_velocity)
+
+print(H_positions.shape)
+print(Cl_positions.shape)
+
+### Clacul des observables
 
 mu = (m_H*m_Cl)/(m_Cl+m_H)
 Mtot = (m_H+m_Cl)
@@ -122,17 +52,17 @@ Relative_velocity = Cl_velocity - H_velocity
 r_norm = np.linalg.norm(Relative_position, axis=1)
 r_dot2 = np.einsum("ij,ij->i",Relative_position, Relative_velocity)/r_norm
 omega = np.linalg.norm(np.cross(Relative_position, Relative_velocity), axis=1) / (r_norm**2)
-
+I = mu*(r_norm**2)
 
 Translation_energy = 0.5 * (m_Cl+m_H)*np.linalg.norm(CM_velocity, axis = 1)**2
 Vibrational_energy = 0.5*(mu)*r_dot2**2
-# print("Energie de vibration", Vibrational_energy)
-I = mu*(r_norm**2)
 Rotational_energy = 0.5*I*omega**2
+Potential_energy = pot_har(r_norm-r_eq)
 
-Potential_energy = pot_morse(r_norm-r_eq)
+Kinetic_energy = Translation_energy + Vibrational_energy + Rotational_energy
+Total_energy = Potential_energy + Kinetic_energy
 
-Total_energy = Potential_energy + Translation_energy + Vibrational_energy + Rotational_energy
+### Affichage
 
 plot1 = [Total_energy[i] for i in range(0,n_steps)]
 plot2 = [Potential_energy[i] for i in range(0,n_steps)]

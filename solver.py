@@ -91,3 +91,11 @@ def solve_verlet(H_pos0 : array,
         Cl_vel.append(vClk.copy())
 
     return H_pos, Cl_pos, H_vel, Cl_vel
+
+def moyenne_cumul(E):
+    n = len(E)
+    moyennes = [E[0]]
+    for k in range(1, n):
+        moyennes.append((k*moyennes[-1] + E[k])/(k+1))
+
+    return moyennes

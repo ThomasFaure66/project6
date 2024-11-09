@@ -19,7 +19,7 @@ potentiel = "Harmonique"
 # Paramètres de simulation
 
 dt = 1e-16 # Pas de temps (s)
-n_steps = 1000000 # Nombre de pas de temps
+n_steps = 100000 # Nombre de pas de temps
 
 # Fonction pour calculer la distance entre les deux atomes
 def distance(H_pos, Cl_pos):

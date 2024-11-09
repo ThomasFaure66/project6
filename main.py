@@ -193,13 +193,25 @@ plot5 = [Rotational_energy[i]/(kB*T_div) for i in range(0,n_steps-2)]
 plot6 = [Kinetic_energy[i]/(kB*T_div) for i in range(0,n_steps-2)]
 temps = [time[i]*10**12 for i in range(0,n_steps-2)]
 
-#Plot Energie totale, potentielle et cinétique
+def moyenne_cumul(E):
+    n = len(E)-2
+    moyennes = [E[0]]
+    for k in range(1, n):
+        moyennes.append((k*moyennes[-1] + E[k])/(k+1))
+
+    return moyennes
+
+plot7 = moyenne_cumul(Total_energy/(kB*T_ther))
+plot8 = moyenne_cumul(Kinetic_energy/(kB*T_ther))
+plot9 = moyenne_cumul(Potential_energy/(kB*T_ther))
+
+#Plot Energie totale, potentielle et cinétique moyenne
 plt.figure(figsize=(10,6))
-plt.plot(temps, plot1, c="red", label="energie totale")
+plt.plot(temps, plot7, c="red", label="energie totale moyenne")
 plt.axhline(np.mean(Total_energy)/(kB*T_div), color='red', linestyle='--', label=f'energie totale moyenne = {np.mean(Total_energy)/(kB*T_div):.2f}')
-plt.plot(temps, plot2, c="blue", label="energie potentielle")
+plt.plot(temps, plot9, c="blue", label="energie potentielle")
 plt.axhline(np.mean(Potential_energy)/(kB*T_div), color='blue', linestyle='--', label=f'energie potentielle moyenne = {np.mean(Potential_energy)/(kB*T_div):.2f}')
-plt.plot(temps, plot6, c="black", label="energie cinétique")
+plt.plot(temps, plot8, c="black", label="energie cinétique")
 plt.axhline(np.mean(Kinetic_energy)/(kB*T_div), color='black', linestyle='--', label=f'energie cinétique moyenne = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
 plt.legend()
 plt.xlabel("Time in picoseconde")
@@ -207,21 +219,35 @@ plt.ylabel("Energy/(kB*T)")
 plt.grid(True)
 plt.show()
 
-#Plot Energie cinétique, de translation, de vibration et de rotation
-plt.figure(figsize=(10,6))
-plt.plot(temps, plot6, c="red", label="energie cinétique")
-plt.axhline(np.mean(Kinetic_energy)/(kB*T_div), color='red', linestyle='--', label=f'energie cinétique moyenne = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
-plt.plot(temps, plot3, c="green", label="energie de translation")
-plt.axhline(np.mean(Translation_energy)/(kB*T_div), color='green', linestyle='--', label=f'energie de translation moyenne = {np.mean(Translation_energy)/(kB*T_div):.2f}')
-plt.plot(temps, plot4, c="orange", label="energie de vibration")
-plt.axhline(np.mean(Vibrational_energy)/(kB*T_div), color='orange', linestyle='--', label=f'energie de vibration moyenne = {np.mean(Vibrational_energy)/(kB*T_div):.2f}')
-plt.plot(temps, plot5, c="black", label="energie rotative")
-plt.axhline(np.mean(Rotational_energy)/(kB*T_div), color='black', linestyle='--', label=f'energie rotationelle moyenne = {np.mean(Rotational_energy)/(kB*T_div):.2f}')
-plt.legend()
-plt.xlabel("Time in picoseconde")
-plt.ylabel("Energy/(kB*T)")
-plt.grid(True)
-plt.show()
+# #Plot Energie totale, potentielle et cinétique
+# plt.figure(figsize=(10,6))
+# plt.plot(temps, plot1, c="red", label="energie totale")
+# plt.axhline(np.mean(Total_energy)/(kB*T_div), color='red', linestyle='--', label=f'energie totale moyenne = {np.mean(Total_energy)/(kB*T_div):.2f}')
+# plt.plot(temps, plot2, c="blue", label="energie potentielle")
+# plt.axhline(np.mean(Potential_energy)/(kB*T_div), color='blue', linestyle='--', label=f'energie potentielle moyenne = {np.mean(Potential_energy)/(kB*T_div):.2f}')
+# plt.plot(temps, plot6, c="black", label="energie cinétique")
+# plt.axhline(np.mean(Kinetic_energy)/(kB*T_div), color='black', linestyle='--', label=f'energie cinétique moyenne = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
+# plt.legend()
+# plt.xlabel("Time in picoseconde")
+# plt.ylabel("Energy/(kB*T)")
+# plt.grid(True)
+# plt.show()
+
+# #Plot Energie cinétique, de translation, de vibration et de rotation
+# plt.figure(figsize=(10,6))
+# plt.plot(temps, plot6, c="red", label="energie cinétique")
+# plt.axhline(np.mean(Kinetic_energy)/(kB*T_div), color='red', linestyle='--', label=f'energie cinétique moyenne = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
+# plt.plot(temps, plot3, c="green", label="energie de translation")
+# plt.axhline(np.mean(Translation_energy)/(kB*T_div), color='green', linestyle='--', label=f'energie de translation moyenne = {np.mean(Translation_energy)/(kB*T_div):.2f}')
+# plt.plot(temps, plot4, c="orange", label="energie de vibration")
+# plt.axhline(np.mean(Vibrational_energy)/(kB*T_div), color='orange', linestyle='--', label=f'energie de vibration moyenne = {np.mean(Vibrational_energy)/(kB*T_div):.2f}')
+# plt.plot(temps, plot5, c="black", label="energie rotative")
+# plt.axhline(np.mean(Rotational_energy)/(kB*T_div), color='black', linestyle='--', label=f'energie rotationelle moyenne = {np.mean(Rotational_energy)/(kB*T_div):.2f}')
+# plt.legend()
+# plt.xlabel("Time in picoseconde")
+# plt.ylabel("Energy/(kB*T)")
+# plt.grid(True)
+# plt.show()
 
 
 # energie_potentiel = [0.5*k*(distance(H_positions[i], Cl_positions[i])-r_eq)**2 for i in range(0,70000)]

@@ -9,17 +9,18 @@ r_eq = 1.27e-10  # Distance d'équilibre de la liaison HCl (m)
 m_H = 1.00784 / (6.022e23)  # Masse de l'atome H (kg)
 m_Cl = 35.453 / (6.022e23)  # Masse de l'atome Cl (kg)
 kB = 1.380e-23 # Constante de Boltzmann
-T_ther = 300 # Température thermostat
+T_ther = 10000  # Température thermostat
 D = 4.6141*1.6e-19
 alpha = 1.81e10
 gamma = 1e12
 k=2*D*alpha**2 # Constante de raideur du ressort (N/m)
 
+T=200
 potentiel = "Harmonique"
 # Paramètres de simulation
 
 dt = 1e-16 # Pas de temps (s)
-n_steps = 1000000 # Nombre de pas de temps
+n_steps = 400000# Nombre de pas de temps
 
 # Fonction pour calculer la distance entre les deux atomes
 def distance(H_pos, Cl_pos):
@@ -31,13 +32,12 @@ def force(H_pos, Cl_pos):
         magnitude = -2*D*alpha*np.exp(-alpha*(r-r_eq))*(np.exp(-alpha*(r-r_eq))-1)
         direction = (Cl_pos - H_pos) / r
         return magnitude * direction
-    else :
+    elif (potentiel =="Harmonique") :
         r = distance(H_pos, Cl_pos)
         magnitude = k * (r - r_eq)
         direction = (Cl_pos - H_pos) / r  # Vecteur directionnel normalisé
         return magnitude * direction
 
-T = 10
 # Algorithme de Verlet pour l'intégration des équations de mouvement en 3D
 
 def verlet_3d():
@@ -46,20 +46,44 @@ def verlet_3d():
     H_pos = np.array([r_eq, 0.0, 0.0])  # Position initiale de H
     Cl_pos = np.array([0.0, 0.0, 0.0])  # Position initiale de Cl (à r_eq de H)
   
-    # Calcul des vitesses quadratiques moyennes pour H et Cl
-    v_H_rms = np.sqrt(3 * kB * T / m_H)
-    v_Cl_rms = np.sqrt(3 * kB * T / m_Cl)
+    L=[]
+    for i in range(0,3):
+        A = np.random.uniform(0, 1)
+        B = np.random.uniform(0, 1)
+        Xi = np.sqrt(2)*np.cos(2*np.pi*A)*np.sqrt(-np.log(B))
+        v0 = np.sqrt(2*kB*T/m_H)
+        L.append(Xi*v0)
 
-    # Génération des vecteurs de vitesse pour H et Cl avec la bonne norme
-    # On génère un vecteur direction aléatoire en tirant des valeurs normales et en normalisant
-    H_vel_direction = np.random.normal(0, 1, 3)
-    H_vel_direction /= np.linalg.norm(H_vel_direction)
-    H_vel = v_H_rms * H_vel_direction
 
-    Cl_vel_direction = np.random.normal(0, 1, 3)
-    Cl_vel_direction /= np.linalg.norm(Cl_vel_direction)
-    Cl_vel = v_Cl_rms * Cl_vel_direction
+    M=[]
+    for i in range(0,3):
+        A = np.random.uniform(0, 1)
+        B = np.random.uniform(0, 1)
+        Xi = np.sqrt(2)*np.cos(2*np.pi*A)*np.sqrt(-np.log(B))
+        v0 = np.sqrt(2*kB*T/m_Cl)
+        M.append(Xi*v0)
     
+    L2=L.copy()
+    M2=M.copy()
+    
+    for i in range(0,3):
+        L[i] = L2[i]-(m_H*L2[i]+m_Cl*M2[i])/(m_H+m_Cl)
+        M[i]= M2[i]-(m_H*L2[i]+m_Cl*M2[i])/(m_H+m_Cl)
+    
+    print(L,M)
+    v_H_carré = L[0]**2+L[1]**2+L[2]**2
+    v_Cl_carré = M[0]**2 + M[1]**2+M[2]**2
+    T_prime = 2/(3*kB)*(0.5*m_H*v_H_carré+0.5*m_Cl*v_Cl_carré)
+
+    print(T_prime)
+    for i in range(0,3):
+        L[i]=np.sqrt(2*T/T_prime)*L[i]
+        M[i]=np.sqrt(2*T/T_prime)*M[i]
+
+    H_vel =np.array(L)
+    Cl_vel=np.array(M)
+
+    print(H_vel)
     # Listes pour enregistrer les positions au cours du temps
     H_positions = [H_pos, H_pos + H_vel*dt]
     Cl_positions = [Cl_pos, Cl_pos + Cl_vel*dt]
@@ -160,7 +184,7 @@ Rotational_energy = 0.5*I*omega**2
 #Potential energy
 if (potentiel == "Morse") :
     Potential_energy = D*(np.exp(-alpha*(np.linalg.norm(Relative_position, axis = 1)-r_eq))-1)**2
-else :
+elif (potentiel =="Harmonique"):
     Potential_energy = 0.5*k*((np.linalg.norm(Relative_position, axis = 1)-r_eq)**2)
 
 #Total energy
@@ -193,6 +217,32 @@ plot5 = [Rotational_energy[i]/(kB*T_div) for i in range(0,n_steps-2)]
 plot6 = [Kinetic_energy[i]/(kB*T_div) for i in range(0,n_steps-2)]
 temps = [time[i]*10**12 for i in range(0,n_steps-2)]
 
+def moyenne_cumul(E):
+    n = len(E)-2
+    moyennes = [E[0]]
+    for k in range(1, n):
+        moyennes.append((k*moyennes[-1] + E[k])/(k+1))
+
+    return moyennes
+
+plot7 = moyenne_cumul(Total_energy/(kB*T_ther))
+plot8 = moyenne_cumul(Kinetic_energy/(kB*T_ther))
+plot9 = moyenne_cumul(Potential_energy/(kB*T_ther))
+
+#Plot Energie totale, potentielle et cinétique moyenne
+plt.figure(figsize=(10,6))
+plt.plot(temps, plot7, c="red", label="energie totale moyenne")
+plt.axhline(np.mean(Total_energy)/(kB*T_div), color='red', linestyle='--', label=f'energie totale moyenne = {np.mean(Total_energy)/(kB*T_div):.2f}')
+plt.plot(temps, plot9, c="blue", label="energie potentielle")
+plt.axhline(np.mean(Potential_energy)/(kB*T_div), color='blue', linestyle='--', label=f'energie potentielle moyenne = {np.mean(Potential_energy)/(kB*T_div):.2f}')
+plt.plot(temps, plot8, c="black", label="energie cinétique")
+plt.axhline(np.mean(Kinetic_energy)/(kB*T_div), color='black', linestyle='--', label=f'energie cinétique moyenne = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
+plt.legend()
+plt.xlabel("Time in picoseconde")
+plt.ylabel("Energy/(kB*T)")
+plt.grid(True)
+plt.show()
+
 #Plot Energie totale, potentielle et cinétique
 plt.figure(figsize=(10,6))
 plt.plot(temps, plot1, c="red", label="energie totale")
@@ -208,20 +258,20 @@ plt.grid(True)
 plt.show()
 
 #Plot Energie cinétique, de translation, de vibration et de rotation
-plt.figure(figsize=(10,6))
-plt.plot(temps, plot6, c="red", label="energie cinétique")
-plt.axhline(np.mean(Kinetic_energy)/(kB*T_div), color='red', linestyle='--', label=f'energie cinétique moyenne = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
-plt.plot(temps, plot3, c="green", label="energie de translation")
-plt.axhline(np.mean(Translation_energy)/(kB*T_div), color='green', linestyle='--', label=f'energie de translation moyenne = {np.mean(Translation_energy)/(kB*T_div):.2f}')
-plt.plot(temps, plot4, c="orange", label="energie de vibration")
-plt.axhline(np.mean(Vibrational_energy)/(kB*T_div), color='orange', linestyle='--', label=f'energie de vibration moyenne = {np.mean(Vibrational_energy)/(kB*T_div):.2f}')
-plt.plot(temps, plot5, c="black", label="energie rotative")
-plt.axhline(np.mean(Rotational_energy)/(kB*T_div), color='black', linestyle='--', label=f'energie rotationelle moyenne = {np.mean(Rotational_energy)/(kB*T_div):.2f}')
-plt.legend()
-plt.xlabel("Time in picoseconde")
-plt.ylabel("Energy/(kB*T)")
-plt.grid(True)
-plt.show()
+# plt.figure(figsize=(10,6))
+# plt.plot(temps, plot6, c="red", label="energie cinétique")
+# plt.axhline(np.mean(Kinetic_energy)/(kB*T_div), color='red', linestyle='--', label=f'energie cinétique moyenne = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
+# plt.plot(temps, plot3, c="green", label="energie de translation")
+# plt.axhline(np.mean(Translation_energy)/(kB*T_div), color='green', linestyle='--', label=f'energie de translation moyenne = {np.mean(Translation_energy)/(kB*T_div):.2f}')
+# plt.plot(temps, plot4, c="orange", label="energie de vibration")
+# plt.axhline(np.mean(Vibrational_energy)/(kB*T_div), color='orange', linestyle='--', label=f'energie de vibration moyenne = {np.mean(Vibrational_energy)/(kB*T_div):.2f}')
+# plt.plot(temps, plot5, c="black", label="energie rotative")
+# plt.axhline(np.mean(Rotational_energy)/(kB*T_div), color='black', linestyle='--', label=f'energie rotationelle moyenne = {np.mean(Rotational_energy)/(kB*T_div):.2f}')
+# plt.legend()
+# plt.xlabel("Time in picoseconde")
+# plt.ylabel("Energy/(kB*T)")
+# plt.grid(True)
+# plt.show()
 
 
 # energie_potentiel = [0.5*k*(distance(H_positions[i], Cl_positions[i])-r_eq)**2 for i in range(0,70000)]

@@ -12,14 +12,14 @@ kB = 1.380e-23 # Constante de Boltzmann
 T_ther = 300 # Température thermostat
 D = 4.6141*1.6e-19
 alpha = 1.81e10
-gamma = 0
+gamma = 1e12
 k=2*D*alpha**2 # Constante de raideur du ressort (N/m)
 T= 20
 potentiel = "Harmonique"
 # Paramètres de simulation
 
 dt = 1e-16 # Pas de temps (s)
-n_steps = 100000 # Nombre de pas de temps
+n_steps = 10000 # Nombre de pas de temps
 
 # Fonction pour calculer la distance entre les deux atomes
 def distance(H_pos, Cl_pos):
@@ -176,6 +176,7 @@ Cl_velocity = np.array(Cl_velocity)
 
 
 mu = (m_H*m_Cl)/(m_Cl+m_H)
+
 CM_velocity = (m_H*H_velocity+m_Cl*Cl_velocity)/(m_H+m_Cl)
 
 Relative_position = Cl_positions - H_positions
@@ -241,30 +242,47 @@ def moyenne_cumul(E):
 plot7 = moyenne_cumul(Total_energy/(kB*T_ther))
 plot8 = moyenne_cumul(Kinetic_energy/(kB*T_ther))
 plot9 = moyenne_cumul(Potential_energy/(kB*T_ther))
+plot10 = moyenne_cumul(Translation_energy/(kB*T_ther))
+plot11 = moyenne_cumul(Rotational_energy/(kB*T_ther))
+plot12 = moyenne_cumul(Vibrational_energy/(kB*T_ther))
 
 #Plot Energie totale, potentielle et cinétique moyenne
-# plt.figure(figsize=(10,6))
-# plt.plot(temps, plot7, c="red", label="energie totale moyenne")
-# plt.axhline(np.mean(Total_energy)/(kB*T_div), color='red', linestyle='--', label=f'energie totale moyenne = {np.mean(Total_energy)/(kB*T_div):.2f}')
-# plt.plot(temps, plot9, c="blue", label="energie potentielle")
-# plt.axhline(np.mean(Potential_energy)/(kB*T_div), color='blue', linestyle='--', label=f'energie potentielle moyenne = {np.mean(Potential_energy)/(kB*T_div):.2f}')
-# plt.plot(temps, plot8, c="black", label="energie cinétique")
-# plt.axhline(np.mean(Kinetic_energy)/(kB*T_div), color='black', linestyle='--', label=f'energie cinétique moyenne = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
-# plt.legend()
-# plt.xlabel("Time in picoseconde")
-# plt.ylabel("Energy/(kB*T)")
-# plt.grid(True)
-# plt.show()
+plt.figure(figsize=(10,6))
+plt.plot(temps, plot7, c="red", label="energie totale moyenne")
+plt.axhline(np.mean(Total_energy)/(kB*T_div), color='red', linestyle='--', label=f'energie totale moyenne = {np.mean(Total_energy)/(kB*T_div):.2f}')
+plt.plot(temps, plot9, c="blue", label="energie potentielle")
+plt.axhline(np.mean(Potential_energy)/(kB*T_div), color='blue', linestyle='--', label=f'energie potentielle moyenne = {np.mean(Potential_energy)/(kB*T_div):.2f}')
+plt.plot(temps, plot8, c="black", label="energie cinétique")
+plt.axhline(np.mean(Kinetic_energy)/(kB*T_div), color='black', linestyle='--', label=f'energie cinétique moyenne = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
+plt.legend()
+plt.xlabel("Time in picoseconde")
+plt.ylabel("Energy/(kB*T)")
+plt.grid(True)
+plt.show()
 
 #Plot Energie totale, potentielle et cinétique
 plt.figure(figsize=(10,6))
 plt.plot(temps, plot1, c="red", label="energie totale")
-plt.axhline(np.mean(Total_energy)/(kB*T_div), color='red', linestyle='--', label=f'energie totale moyenne = {np.mean(Total_energy)/(kB*T_div):.2f}')
+# plt.axhline(np.mean(Total_energy)/(kB*T_div), color='red', linestyle='--', label=f'energie totale moyenne = {np.mean(Total_energy)/(kB*T_div):.2f}')
 plt.plot(temps, plot2, c="blue", label="energie potentielle")
-plt.axhline(np.mean(Potential_energy)/(kB*T_div), color='blue', linestyle='--', label=f'energie potentielle moyenne = {np.mean(Potential_energy)/(kB*T_div):.2f}')
-plt.plot(temps, plot6, c="black", label="energie cinétique")
-plt.axhline(np.mean(Kinetic_energy)/(kB*T_div), color='black', linestyle='--', label=f'energie cinétique moyenne = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
+# plt.axhline(np.mean(Potential_energy)/(kB*T_div), color='blue', linestyle='--', label=f'energie potentielle moyenne = {np.mean(Potential_energy)/(kB*T_div):.2f}')
+plt.plot(temps, plot6, c="green", label="energie cinétique")
+# plt.axhline(np.mean(Kinetic_energy)/(kB*T_div), color='green', linestyle='--', label=f'energie cinétique moyenne = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
 plt.legend()
+plt.xlabel("Time in picoseconde")
+plt.ylabel("Energy/(kB*T)")
+plt.grid(True)
+plt.show()
+
+# #Plot Energie cinétique, de translation, de vibration et de rotation moyennes
+plt.figure(figsize=(10,6))
+plt.plot(temps, plot10, c="red", label="energie translation moyenne")
+plt.axhline(np.mean(Translation_energy)/(kB*T_div), color='red', linestyle='--', label=f'energie totale moyenne = {np.mean(Total_energy)/(kB*T_div):.2f}')
+plt.plot(temps, plot11, c="blue", label="energie de rotation moyenne")
+plt.axhline(np.mean(Rotational_energy)/(kB*T_div), color='blue', linestyle='--', label=f'energie potentielle moyenne = {np.mean(Potential_energy)/(kB*T_div):.2f}')
+plt.plot(temps, plot12, c="black", label="energie de vibration moyenne")
+plt.axhline(np.mean(Vibrational_energy)/(kB*T_div), color='black', linestyle='--', label=f'energie cinétique moyenne = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
+plt.legend(loc='lower right', fontsize=7)
 plt.xlabel("Time in picoseconde")
 plt.ylabel("Energy/(kB*T)")
 plt.grid(True)

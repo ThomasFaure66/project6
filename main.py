@@ -15,11 +15,11 @@ alpha = 1.81e10
 gamma = 1e12
 k=2*D*alpha**2 # Constante de raideur du ressort (N/m)
 T= 20
-potentiel = "Harmonique"
+potentiel = "Morse"
 # Paramètres de simulation
 
 dt = 1e-16 # Pas de temps (s)
-n_steps = 10000 # Nombre de pas de temps
+n_steps = 10000000 # Nombre de pas de temps
 
 # Fonction pour calculer la distance entre les deux atomes
 def distance(H_pos, Cl_pos):
@@ -249,11 +249,11 @@ plot12 = moyenne_cumul(Vibrational_energy/(kB*T_ther))
 #Plot Energie totale, potentielle et cinétique moyenne
 plt.figure(figsize=(10,6))
 plt.plot(temps, plot7, c="red", label="energie totale moyenne")
-plt.axhline(np.mean(Total_energy)/(kB*T_div), color='red', linestyle='--', label=f'energie totale moyenne = {np.mean(Total_energy)/(kB*T_div):.2f}')
+plt.axhline(np.mean(Total_energy)/(kB*T_div), color='red', linestyle='--', label=f'Limite = {np.mean(Total_energy)/(kB*T_div):.2f}')
 plt.plot(temps, plot9, c="blue", label="energie potentielle")
-plt.axhline(np.mean(Potential_energy)/(kB*T_div), color='blue', linestyle='--', label=f'energie potentielle moyenne = {np.mean(Potential_energy)/(kB*T_div):.2f}')
+plt.axhline(np.mean(Potential_energy)/(kB*T_div), color='blue', linestyle='--', label=f'Limite = {np.mean(Potential_energy)/(kB*T_div):.2f}')
 plt.plot(temps, plot8, c="black", label="energie cinétique")
-plt.axhline(np.mean(Kinetic_energy)/(kB*T_div), color='black', linestyle='--', label=f'energie cinétique moyenne = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
+plt.axhline(np.mean(Kinetic_energy)/(kB*T_div), color='black', linestyle='--', label=f'Limite = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
 plt.legend()
 plt.xlabel("Time in picoseconde")
 plt.ylabel("Energy/(kB*T)")
@@ -261,28 +261,28 @@ plt.grid(True)
 plt.show()
 
 #Plot Energie totale, potentielle et cinétique
-plt.figure(figsize=(10,6))
-plt.plot(temps, plot1, c="red", label="energie totale")
-# plt.axhline(np.mean(Total_energy)/(kB*T_div), color='red', linestyle='--', label=f'energie totale moyenne = {np.mean(Total_energy)/(kB*T_div):.2f}')
-plt.plot(temps, plot2, c="blue", label="energie potentielle")
-# plt.axhline(np.mean(Potential_energy)/(kB*T_div), color='blue', linestyle='--', label=f'energie potentielle moyenne = {np.mean(Potential_energy)/(kB*T_div):.2f}')
-plt.plot(temps, plot6, c="green", label="energie cinétique")
-# plt.axhline(np.mean(Kinetic_energy)/(kB*T_div), color='green', linestyle='--', label=f'energie cinétique moyenne = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
-plt.legend()
-plt.xlabel("Time in picoseconde")
-plt.ylabel("Energy/(kB*T)")
-plt.grid(True)
-plt.show()
+# plt.figure(figsize=(10,6))
+# plt.plot(temps, plot1, c="red", label="energie totale")
+# # plt.axhline(np.mean(Total_energy)/(kB*T_div), color='red', linestyle='--', label=f'energie totale moyenne = {np.mean(Total_energy)/(kB*T_div):.2f}')
+# plt.plot(temps, plot2, c="blue", label="energie potentielle")
+# # plt.axhline(np.mean(Potential_energy)/(kB*T_div), color='blue', linestyle='--', label=f'energie potentielle moyenne = {np.mean(Potential_energy)/(kB*T_div):.2f}')
+# plt.plot(temps, plot6, c="green", label="energie cinétique")
+# # plt.axhline(np.mean(Kinetic_energy)/(kB*T_div), color='green', linestyle='--', label=f'energie cinétique moyenne = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
+# plt.legend()
+# plt.xlabel("Time in picoseconde")
+# plt.ylabel("Energy/(kB*T)")
+# plt.grid(True)
+# plt.show()
 
 # #Plot Energie cinétique, de translation, de vibration et de rotation moyennes
 plt.figure(figsize=(10,6))
 plt.plot(temps, plot10, c="red", label="energie translation moyenne")
-plt.axhline(np.mean(Translation_energy)/(kB*T_div), color='red', linestyle='--', label=f'energie totale moyenne = {np.mean(Total_energy)/(kB*T_div):.2f}')
+plt.axhline(np.mean(Translation_energy)/(kB*T_div), color='red', linestyle='--', label=f'Limite = {np.mean(Translation_energy)/(kB*T_div):.2f}')
 plt.plot(temps, plot11, c="blue", label="energie de rotation moyenne")
-plt.axhline(np.mean(Rotational_energy)/(kB*T_div), color='blue', linestyle='--', label=f'energie potentielle moyenne = {np.mean(Potential_energy)/(kB*T_div):.2f}')
+plt.axhline(np.mean(Rotational_energy)/(kB*T_div), color='blue', linestyle='--', label=f'Limite = {np.mean(Rotational_energy)/(kB*T_div):.2f}')
 plt.plot(temps, plot12, c="black", label="energie de vibration moyenne")
-plt.axhline(np.mean(Vibrational_energy)/(kB*T_div), color='black', linestyle='--', label=f'energie cinétique moyenne = {np.mean(Kinetic_energy)/(kB*T_div):.2f}')
-plt.legend(loc='lower right', fontsize=7)
+plt.axhline(np.mean(Vibrational_energy)/(kB*T_div), color='black', linestyle='--', label=f'Limite = {np.mean(Vibrational_energy)/(kB*T_div):.2f}')
+plt.legend(loc='lower right', fontsize=8)
 plt.xlabel("Time in picoseconde")
 plt.ylabel("Energy/(kB*T)")
 plt.grid(True)
@@ -321,21 +321,21 @@ plt.show()
 # plt.show()
 
 #Visualisation de la distance entre H et Cl au cours du temps
-distances = [distance(H_positions[i], Cl_positions[i])*10**10 for i in range(0,n_steps-2)]
-temps = [time[i]*10**12 for i in range(0,n_steps-2)]
-plt.figure(figsize=(10, 6))
-plt.plot(temps, distances)
-plt.axhline(r_eq*10**10, color='red', linestyle='--', label='Distance d\'équilibre')
-plt.xlabel('Time in picoseconde')
-plt.ylabel('Distance H-Cl (Ångström)')
-plt.title('Distance entre H et Cl au cours du temps')
-plt.legend()
-plt.grid(True)
-if (potentiel == "Morse"):
-    plt.savefig("distance_relative_Morse.png", format="png", dpi=300)
-else :
-    plt.savefig("distance_relative_Harmonique.png", format="png", dpi=300)
-plt.show()
+# distances = [distance(H_positions[i], Cl_positions[i])*10**10 for i in range(0,n_steps-2)]
+# temps = [time[i]*10**12 for i in range(0,n_steps-2)]
+# plt.figure(figsize=(10, 6))
+# plt.plot(temps, distances)
+# plt.axhline(r_eq*10**10, color='red', linestyle='--', label='Distance d\'équilibre')
+# plt.xlabel('Time in picoseconde')
+# plt.ylabel('Distance H-Cl (Ångström)')
+# plt.title('Distance entre H et Cl au cours du temps')
+# plt.legend()
+# plt.grid(True)
+# if (potentiel == "Morse"):
+#     plt.savefig("distance_relative_Morse.png", format="png", dpi=300)
+# else :
+#     plt.savefig("distance_relative_Harmonique.png", format="png", dpi=300)
+# plt.show()
 
 
 # #Visualtion de la position sur x de H et de Cl au cours du temps

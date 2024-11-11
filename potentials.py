@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 D = 4.6141 * 1.6e-19
 alpha = 1.81e10
 k = 2*D*alpha**2
+kB = 1.380e-23 # Constante de Boltzmann
 
 r_eq = 1.27e-10  # Distance d'équilibre de la liaison HCl (m)
 
@@ -26,18 +27,29 @@ def force_morse(H_pos, Cl_pos):
 
     return -2*D*alpha*fact*(fact-1) * direction
 
-def har_lang(T, gamma):
-    def force(H_pos, Cl_pos):
-        f = force_harmonique(H_pos, Cl_pos)
-    return force
-
 def pot_har(x):
     return .5*k*x**2
 
 def pot_morse(x):
     return D*(np.exp(-alpha*x)-1)**2
 
+if __name__ == "__main__":
+    
+    T1 = 100
+    T2 = 10000
+    x_values = np.linspace(-0.3e-10, 1.3e-10, 10000)
+    y_values = pot_morse(x_values)
+    z_values = pot_har(x_values)
 
-#plt.plot([pot_har(k*1e-13) for k in range(-200, 500)])
-#plt.plot([pot_morse(k*1e-13) for k in range(-200, 500)], c="red")
-#plt.show()
+    plt.figure(figsize=(8, 6))
+    plt.plot(x_values, y_values, label=r"$Morse$", color="blue")
+    plt.plot(x_values, z_values, label =r"$Harmonique$", color="red")
+    plt.axhline(.5*kB*T1, color='green', linestyle='--', label=r"100K")
+    plt.axhline(.5*kB*T2, color='orange', linestyle='--', label=r"10000K")
+
+    plt.xlabel("r")
+    plt.ylabel("Potentiel")
+    plt.title("Potentiel")
+    plt.legend()
+    plt.grid(True)
+    plt.show()

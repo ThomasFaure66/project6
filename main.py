@@ -10,25 +10,27 @@ r_eq = 1.27e-10  # Distance d'équilibre de la liaison HCl (m)
 m_H = 1.00784 / (6.022e23)  # Masse de l'atome H (kg)
 m_Cl = 35.453 / (6.022e23)  # Masse de l'atome Cl (kg)
 kB = 1.380e-23 # Constante de Boltzmann
-T_ther = 1 # Température thermostat
-gamma = 1e12
+T_ther = 500 # Température thermostat
+gamma = 1e14
 # Paramètres de simulation
 
 dt = 1e-16 # Pas de temps (s)
-n_steps = 2000000  # Nombre de pas de temps
+n_steps = 10000  # Nombre de pas de temps
 
 # Lancement de la simulation
 
 H_pos0 = np.array([r_eq, 0.0, 0.0])  # Position initiale de H
-Cl_pos0 = np.array([0.0, 0.0, 0.0])  # Position initiale de Cl (à r_eq de H)
+Cl_pos0 = np.array([-r_eq/20, 0.0, 0.0])  # Position initiale de Cl (à r_eq de H)
+#temperatures = [10*k for k in range(10)]
+#E, K, V = [], [], []
 
-H_positions, Cl_positions, H_velocity, Cl_velocity = solve_verlet_lang(H_pos0=H_pos0,
-                                                                        Cl_pos0=Cl_pos0,
-                                                                        F = force_har,
-                                                                        N = n_steps,
-                                                                        dt=dt,
-                                                                        gamma = gamma,
-                                                                        T=T_ther
+#for T in temperatures:
+H_positions, Cl_positions, H_velocity, Cl_velocity = solve_verlet(H_pos0=H_pos0,
+                                                                    Cl_pos0=Cl_pos0,
+                                                                    F = force_harmonique,
+                                                                    N = n_steps,
+                                                                    dt=dt,
+                                                                    H_vel0= np.sqrt(np.array([0.0, .5*kB*T_ther/m_H, 0.0]))
 )
 #time, H_positions, Cl_positions, H_velocity, Cl_velocity = verlet_3d()
 
@@ -54,11 +56,25 @@ I = mu*(r_norm**2)
 Translation_energy = 0.5 * (m_Cl+m_H)*np.linalg.norm(CM_velocity, axis = 1)**2
 Vibrational_energy = 0.5*(mu)*r_dot2**2
 Rotational_energy = 0.5*I*omega**2
-Potential_energy = pot_morse(r_norm-r_eq)
+Potential_energy = pot_har(r_norm-r_eq)
 
 Kinetic_energy = Translation_energy + Vibrational_energy + Rotational_energy
 Total_energy = Potential_energy + Kinetic_energy
 
+    # E.append(np.mean(Total_energy[100000:]/(kB*T)))
+    # K.append(np.mean(Kinetic_energy[100000:]/(kB*T)))
+    # V.append(np.mean(Potential_energy[100000:]/(kB*T)))
+
+    # print(T)
+
+# plt.scatter(temperatures, E, c = "red", label="Energie totale")
+# plt.scatter(temperatures, K, c = "blue", label="Energie cinétique")
+# plt.scatter(temperatures, V, c = "red", label="Energie Potentielle")
+# plt.xlabel("Température (K)")
+# plt.ylabel("E/kBT")
+# plt.legend()
+# plt.grid(True)
+# plt.show()
 ### Affichage
 
 # plot1 = [Total_energy[i] for i in range(0,n_steps)]
@@ -69,24 +85,29 @@ Total_energy = Potential_energy + Kinetic_energy
 # temps = [k*dt for k in range(n_steps)]
 # plt.figure(figsize=(10,6))
 
-plot1 = moyenne_cumul(Total_energy/(kB*T_ther))
-plot2 = moyenne_cumul(Kinetic_energy/(kB*T_ther))
-plot3 = moyenne_cumul(Potential_energy/(kB*T_ther))
-temps = [k*dt for k in range(n_steps+1)]
-plt.figure(figsize=(10,6))
+plot1 = moyenne_cumul(Total_energy)
+plot2 = moyenne_cumul(Rotational_energy)
+plot3 = moyenne_cumul(Vibrational_energy)
+plot4 = moyenne_cumul(Potential_energy)
+temps = [k*1e-4 for k in range(n_steps+1)]
+# plt.figure(figsize=(10,6))
 
-plt.plot(temps, plot1, c="red", label="energie totale")
+plt.plot(temps, Total_energy/(kB*T_ther), c="red", label="Energie totale")
 #plt.axhline(np.mean(Total_energy[-1000:]), color='red', linestyle='--', label='"energie totale moyenne')
-plt.plot(temps, plot2, c="blue", label="energie cinétiquee")
+plt.plot(temps, Rotational_energy/(kB*T_ther), c="blue", label="Energie de rotation")
 #plt.axhline(np.mean(Potential_energy[-1000:]), color='blue', linestyle='--', label='"energie potentielle moyenne')
-plt.plot(temps, plot3, c="green", label="energie potentielle")
+plt.plot(temps, Vibrational_energy/(kB*T_ther), c="green", label="Energie de vibration")
+plt.plot(temps, Potential_energy/(kB*T_ther), c="orange", label="Energie Potentielle")
 #plt.axhline(np.mean(Translation_energy[-1000:]), color='green', linestyle='--', label='"energie de translation moyenne')
 #plt.plot(temps, plot4, c="orange", label="energie de vibration")
 #plt.axhline(np.mean(Vibrational_energy[-1000:]), color='orange', linestyle='--', label='"energie de vibration moyenne')
 #plt.plot(temps, plot5, c="yellow", label="energie rotative")
 #plt.axhline(np.mean(Rotational_energy[-1000:]), color='yellow', linestyle='--', label='"energie rotationelle moyenne')
+plt.ylabel('E/kbT')
+plt.xlabel('Temps (ps)')
 plt.legend()
 plt.grid(True)
+plt.savefig("equi_morse.png")
 plt.show()
 
 #Visualisation de la distance entre H et Cl au cours du temps

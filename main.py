@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 from potentials import distance, force_harmonique, force_morse, k, r_eq, pot_morse, pot_har
 from solver import solve_verlet, solve_verlet_lang, moyenne_cumul
+from animation import animation
 
 # Constantes physiques
 
@@ -10,17 +11,17 @@ r_eq = 1.27e-10  # Distance d'équilibre de la liaison HCl (m)
 m_H = 1.00784 / (6.022e23)  # Masse de l'atome H (kg)
 m_Cl = 35.453 / (6.022e23)  # Masse de l'atome Cl (kg)
 kB = 1.380e-23 # Constante de Boltzmann
-T_ther = 500 # Température thermostat
-gamma = 1e14
+T_ther = 100 # Température thermostat
+gamma = 0
 # Paramètres de simulation
 
 dt = 1e-16 # Pas de temps (s)
-n_steps = 10000  # Nombre de pas de temps
+n_steps = 5000  # Nombre de pas de temps
 
 # Lancement de la simulation
 
 H_pos0 = np.array([r_eq, 0.0, 0.0])  # Position initiale de H
-Cl_pos0 = np.array([-r_eq/20, 0.0, 0.0])  # Position initiale de Cl (à r_eq de H)
+Cl_pos0 = np.array([-r_eq/10, 0.0, 0.0])  # Position initiale de Cl (à r_eq de H)
 #temperatures = [10*k for k in range(10)]
 #E, K, V = [], [], []
 
@@ -30,7 +31,7 @@ H_positions, Cl_positions, H_velocity, Cl_velocity = solve_verlet(H_pos0=H_pos0,
                                                                     F = force_harmonique,
                                                                     N = n_steps,
                                                                     dt=dt,
-                                                                    H_vel0= np.sqrt(np.array([0.0, .5*kB*T_ther/m_H, 0.0]))
+                                                                    H_vel0= np.sqrt(np.array([0.0, 5*kB*T_ther/m_H, 0.0]))
 )
 #time, H_positions, Cl_positions, H_velocity, Cl_velocity = verlet_3d()
 
@@ -39,6 +40,8 @@ H_positions = np.array(H_positions)
 Cl_positions = np.array(Cl_positions)
 H_velocity = np.array(H_velocity)
 Cl_velocity = np.array(Cl_velocity)
+
+animation(H_positions, Cl_positions)
 
 ### Clacul des observables
 
@@ -107,7 +110,6 @@ plt.ylabel('E/kbT')
 plt.xlabel('Temps (ps)')
 plt.legend()
 plt.grid(True)
-plt.savefig("equi_morse.png")
 plt.show()
 
 #Visualisation de la distance entre H et Cl au cours du temps
